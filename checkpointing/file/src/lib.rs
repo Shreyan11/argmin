@@ -1,12 +1,13 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use crate::core::checkpointing::{Checkpoint, CheckpointingFrequency};
-use crate::core::{DeserializeOwnedAlias, Error, SerializeAlias};
+pub use argmin::core::checkpointing::{Checkpoint, CheckpointingFrequency};
+use argmin::core::Error;
+use serde::{de::DeserializeOwned, Serialize};
 use std::default::Default;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
@@ -31,7 +32,7 @@ impl Default for FileCheckpoint {
     /// # Example
     ///
     /// ```
-    /// use argmin::core::checkpointing::FileCheckpoint;
+    /// use argmin_checkpointing_file::FileCheckpoint;
     /// # use argmin::core::checkpointing::CheckpointingFrequency;
     /// # use std::path::PathBuf;
     ///
@@ -55,7 +56,7 @@ impl FileCheckpoint {
     /// # Example
     ///
     /// ```
-    /// use argmin::core::checkpointing::{FileCheckpoint, CheckpointingFrequency};
+    /// use argmin_checkpointing_file::{FileCheckpoint, CheckpointingFrequency};
     /// # use std::path::PathBuf;
     ///
     /// let directory = "checkpoints";
@@ -79,8 +80,8 @@ impl FileCheckpoint {
 
 impl<S, I> Checkpoint<S, I> for FileCheckpoint
 where
-    S: SerializeAlias + DeserializeOwnedAlias,
-    I: SerializeAlias + DeserializeOwnedAlias,
+    S: Serialize + DeserializeOwned,
+    I: Serialize + DeserializeOwned,
 {
     /// Writes checkpoint to disk.
     ///
@@ -91,7 +92,7 @@ where
     /// # Example
     ///
     /// ```
-    /// use argmin::core::checkpointing::{FileCheckpoint, CheckpointingFrequency, Checkpoint};
+    /// use argmin_checkpointing_file::{FileCheckpoint, CheckpointingFrequency, Checkpoint};
     ///
     /// # use std::fs::File;
     /// # use std::io::BufReader;
@@ -126,12 +127,13 @@ where
     /// # Example
     ///
     /// ```
-    /// use argmin::core::checkpointing::{FileCheckpoint, CheckpointingFrequency, Checkpoint};
+    /// use argmin_checkpointing_file::{FileCheckpoint, CheckpointingFrequency, Checkpoint};
     /// # use argmin::core::Error;
     ///
     /// # use std::fs::File;
     /// # use std::io::BufWriter;
     /// # fn main() -> Result<(), Error> {
+    /// # std::fs::DirBuilder::new().recursive(true).create(".checkpoints").unwrap();
     /// # let f = BufWriter::new(File::create(".checkpoints/load_test.arg")?);
     /// # let f_solver: u64 = 12;
     /// # let f_state: u64 = 21;
@@ -164,18 +166,17 @@ where
 
     /// Returns the how often a checkpoint is to be saved.
     ///
-    /// Used internally by [`save_cond`](`crate::core::checkpointing::Checkpoint::save_cond`).
+    /// Used internally by [`save_cond`](`argmin::core::checkpointing::Checkpoint::save_cond`).
     fn frequency(&self) -> CheckpointingFrequency {
         self.frequency
     }
 }
 
 #[cfg(test)]
-#[cfg(feature = "serde1")]
 mod tests {
     use super::*;
-    use crate::core::test_utils::TestSolver;
-    use crate::core::{IterState, State};
+    use argmin::core::test_utils::TestSolver;
+    use argmin::core::{IterState, State};
 
     #[test]
     #[allow(clippy::type_complexity)]

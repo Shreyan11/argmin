@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -6,8 +6,8 @@
 // copied, modified, or distributed except according to those terms.
 
 use crate::core::{
-    ArgminFloat, CostFunction, Error, Gradient, IterState, LineSearch, Problem, SerializeAlias,
-    Solver, TerminationReason, TerminationStatus, KV,
+    ArgminFloat, CostFunction, Error, Gradient, IterState, LineSearch, Problem, Solver,
+    TerminationReason, TerminationStatus, KV,
 };
 use argmin_math::{ArgminDot, ArgminScaledAdd};
 #[cfg(feature = "serde1")]
@@ -498,8 +498,8 @@ impl<P, G, F> LineSearch<G, F> for HagerZhangLineSearch<P, G, F> {
 impl<P, G, O, F> Solver<O, IterState<P, G, (), (), (), F>> for HagerZhangLineSearch<P, G, F>
 where
     O: CostFunction<Param = P, Output = F> + Gradient<Param = P, Gradient = G>,
-    P: Clone + SerializeAlias + ArgminDot<G, F> + ArgminScaledAdd<G, F, P>,
-    G: Clone + SerializeAlias + ArgminDot<G, F>,
+    P: Clone + ArgminDot<G, F> + ArgminScaledAdd<G, F, P>,
+    G: Clone + ArgminDot<G, F>,
     F: ArgminFloat,
 {
     const NAME: &'static str = "Hager-Zhang line search";

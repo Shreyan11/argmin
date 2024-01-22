@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -7,12 +7,12 @@
 
 use argmin::{
     core::{
-        checkpointing::{CheckpointingFrequency, FileCheckpoint},
-        observers::ObserverMode,
-        CostFunction, Error, Executor, Gradient,
+        checkpointing::CheckpointingFrequency, observers::ObserverMode, CostFunction, Error,
+        Executor, Gradient,
     },
     solver::landweber::Landweber,
 };
+use argmin_checkpointing_file::FileCheckpoint;
 use argmin_observer_slog::SlogLogger;
 use argmin_testfunctions::{rosenbrock_2d, rosenbrock_2d_derivative};
 
@@ -57,8 +57,6 @@ fn run() -> Result<(), Error> {
         .add_observer(SlogLogger::term(), ObserverMode::Always)
         .run()?;
 
-    // Wait a second (lets the logger flush everything before printing to screen again)
-    std::thread::sleep(std::time::Duration::from_secs(1));
     println!("{res}");
     Ok(())
 }

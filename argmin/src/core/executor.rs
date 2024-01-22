@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -8,8 +8,7 @@
 use crate::core::checkpointing::Checkpoint;
 use crate::core::observers::{Observe, ObserverMode, Observers};
 use crate::core::{
-    DeserializeOwnedAlias, Error, OptimizationResult, Problem, SerializeAlias, Solver, State,
-    TerminationReason, TerminationStatus, KV,
+    Error, OptimizationResult, Problem, Solver, State, TerminationReason, TerminationStatus, KV,
 };
 use instant;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -27,6 +26,8 @@ pub struct Executor<O, S, I> {
     observers: Observers<I>,
     /// Checkpoint
     checkpoint: Option<Box<dyn Checkpoint<S, I>>>,
+    /// Timeout
+    timeout: Option<std::time::Duration>,
     /// Indicates whether Ctrl-C functionality should be active or not
     ctrlc: bool,
     /// Indicates whether to time execution or not
@@ -36,7 +37,7 @@ pub struct Executor<O, S, I> {
 impl<O, S, I> Executor<O, S, I>
 where
     S: Solver<O, I>,
-    I: State + SerializeAlias + DeserializeOwnedAlias,
+    I: State,
 {
     /// Constructs an `Executor` from a user defined problem and a solver.
     ///
@@ -67,6 +68,7 @@ where
             state,
             observers: Observers::new(),
             checkpoint: None,
+            timeout: None,
             ctrlc: true,
             timer: true,
         }
@@ -251,10 +253,18 @@ where
             }
 
             if self.timer {
+                // Increase accumulated total_time
                 total_time.map(|total_time| state.time(Some(total_time.elapsed())));
+
+                // If a timeout is set, check if timeout is reached
+                if let (Some(timeout), Some(total_time)) = (self.timeout, total_time) {
+                    if total_time.elapsed() > timeout {
+                        state = state.terminate_with(TerminationReason::Timeout);
+                    }
+                }
             }
 
-            // Check if termination occurred inside next_iter()
+            // Check if termination occurred in the meantime
             if state.terminated() {
                 break;
             }
@@ -313,7 +323,8 @@ where
     /// ```
     /// # use argmin::core::{Error, Executor};
     /// # #[cfg(feature = "serde1")]
-    /// # use argmin::core::checkpointing::{FileCheckpoint, CheckpointingFrequency};
+    /// # use argmin::core::checkpointing::CheckpointingFrequency;
+    /// # use argmin_checkpointing_file::FileCheckpoint;
     /// # use argmin::core::test_utils::{TestSolver, TestProblem};
     /// #
     /// # fn main() -> Result<(), Error> {
@@ -374,6 +385,8 @@ where
 
     /// Enables or disables timing of individual iterations (default: enabled).
     ///
+    /// Setting this to false will silently be ignored in case a timeout is set.
+    ///
     /// # Example
     ///
     /// ```
@@ -391,7 +404,38 @@ where
     /// ```
     #[must_use]
     pub fn timer(mut self, timer: bool) -> Self {
-        self.timer = timer;
+        if self.timeout.is_none() {
+            self.timer = timer;
+        }
+        self
+    }
+
+    /// Sets a timeout for the run.
+    ///
+    /// The optimization run is stopped once the timeout is exceeded. Note that the check is
+    /// performed after each iteration, therefore the actual runtime can exceed the the set
+    /// duration.
+    /// This also enables time measurements.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use argmin::core::{Error, Executor};
+    /// # use argmin::core::test_utils::{TestSolver, TestProblem};
+    /// #
+    /// # fn main() -> Result<(), Error> {
+    /// # let solver = TestSolver::new();
+    /// # let problem = TestProblem::new();
+    /// #
+    /// // Create instance of `Executor` with `problem` and `solver`
+    /// let executor = Executor::new(problem, solver).timeout(std::time::Duration::from_secs(30));
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub fn timeout(mut self, timeout: std::time::Duration) -> Self {
+        self.timer = true;
+        self.timeout = Some(timeout);
         self
     }
 }
@@ -573,14 +617,59 @@ mod tests {
     #[test]
     #[cfg(feature = "serde1")]
     fn test_checkpointing_solver_initialization() {
-        use crate::core::checkpointing::{CheckpointingFrequency, FileCheckpoint};
-        use crate::core::test_utils::TestProblem;
-        use crate::core::{ArgminFloat, CostFunction};
+        use std::cell::RefCell;
+
+        use crate::core::{
+            checkpointing::CheckpointingFrequency, test_utils::TestProblem, ArgminFloat,
+            CostFunction,
+        };
         use serde::{Deserialize, Serialize};
 
-        // Fake optimization algorithm which holds internal state which changes over time
         #[derive(Clone)]
-        #[cfg_attr(feature = "serde1", derive(Serialize, Deserialize))]
+        pub struct FakeCheckpoint {
+            pub frequency: CheckpointingFrequency,
+            pub solver: RefCell<Option<OptimizationAlgorithm>>,
+            pub state: RefCell<Option<IterState<Vec<f64>, (), (), (), (), f64>>>,
+        }
+
+        impl Checkpoint<OptimizationAlgorithm, IterState<Vec<f64>, (), (), (), (), f64>>
+            for FakeCheckpoint
+        {
+            fn save(
+                &self,
+                solver: &OptimizationAlgorithm,
+                state: &IterState<Vec<f64>, (), (), (), (), f64>,
+            ) -> Result<(), Error> {
+                *self.solver.borrow_mut() = Some(solver.clone());
+                *self.state.borrow_mut() = Some(state.clone());
+                Ok(())
+            }
+
+            fn load(
+                &self,
+            ) -> Result<
+                Option<(
+                    OptimizationAlgorithm,
+                    IterState<Vec<f64>, (), (), (), (), f64>,
+                )>,
+                Error,
+            > {
+                if self.solver.borrow().is_none() {
+                    return Ok(None);
+                }
+                Ok(Some((
+                    self.solver.borrow().clone().unwrap(),
+                    self.state.borrow().clone().unwrap(),
+                )))
+            }
+
+            fn frequency(&self) -> CheckpointingFrequency {
+                self.frequency
+            }
+        }
+
+        // Fake optimization algorithm which holds internal state which changes over time
+        #[derive(Clone, Serialize, Deserialize)]
         struct OptimizationAlgorithm {
             pub internal_state: u64,
         }
@@ -638,12 +727,12 @@ mod tests {
         // solver instance
         let solver = OptimizationAlgorithm { internal_state: 0 };
 
-        // Delete old checkpointing file
-        let _ = std::fs::remove_file(".checkpoints/init_test.arg");
-
         // Create a checkpoint
-        let checkpoint =
-            FileCheckpoint::new(".checkpoints", "init_test", CheckpointingFrequency::Always);
+        let checkpoint = FakeCheckpoint {
+            frequency: CheckpointingFrequency::Always,
+            solver: RefCell::new(None),
+            state: RefCell::new(None),
+        };
 
         // Create and run executor
         let executor = Executor::new(problem, solver)
@@ -669,5 +758,32 @@ mod tests {
 
         // Delete old checkpointing file
         let _ = std::fs::remove_file(".checkpoints/init_test.arg");
+    }
+
+    #[test]
+    fn test_timeout() {
+        let solver = TestSolver::new();
+        let problem = TestProblem::new();
+        let timeout = std::time::Duration::from_secs(2);
+
+        let executor = Executor::new(problem, solver);
+        assert!(executor.timer);
+        assert!(executor.timeout.is_none());
+
+        let executor = Executor::new(problem, solver).timer(false);
+        assert!(!executor.timer);
+        assert!(executor.timeout.is_none());
+
+        let executor = Executor::new(problem, solver).timeout(timeout);
+        assert!(executor.timer);
+        assert_eq!(executor.timeout, Some(timeout));
+
+        let executor = Executor::new(problem, solver).timeout(timeout).timer(false);
+        assert!(executor.timer);
+        assert_eq!(executor.timeout, Some(timeout));
+
+        let executor = Executor::new(problem, solver).timer(false).timeout(timeout);
+        assert!(executor.timer);
+        assert_eq!(executor.timeout, Some(timeout));
     }
 }

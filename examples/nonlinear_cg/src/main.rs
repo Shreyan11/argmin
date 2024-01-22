@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -66,9 +66,6 @@ fn run() -> Result<(), Error> {
         .configure(|state| state.param(init_param).max_iters(20).target_cost(0.0))
         .add_observer(SlogLogger::term(), ObserverMode::Always)
         .run()?;
-
-    // Wait a second (lets the logger flush everything before printing to screen again)
-    std::thread::sleep(std::time::Duration::from_secs(1));
 
     // Print result
     println!("{res}");

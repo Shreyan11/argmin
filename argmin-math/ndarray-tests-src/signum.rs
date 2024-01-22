@@ -1,19 +1,18 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-
 #[cfg(test)]
 mod tests {
     #[allow(unused_imports)]
     use super::*;
     use argmin_math::ArgminSignum;
+    use ndarray::array;
     use ndarray::{Array1, Array2};
     use num_complex::Complex;
-       use ndarray::array;
     use paste::item;
 
     macro_rules! make_test {
@@ -120,7 +119,6 @@ mod tests {
         };
     }
 
-    make_test!(isize);
     make_test!(i8);
     make_test!(i16);
     make_test!(i32);

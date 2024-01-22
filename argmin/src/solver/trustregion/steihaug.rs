@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -6,8 +6,8 @@
 // copied, modified, or distributed except according to those terms.
 
 use crate::core::{
-    ArgminFloat, Error, IterState, Problem, SerializeAlias, Solver, State, TerminationReason,
-    TerminationStatus, TrustRegionRadius, KV,
+    ArgminFloat, Error, IterState, Problem, Solver, State, TerminationReason, TerminationStatus,
+    TrustRegionRadius, KV,
 };
 use argmin_math::{
     ArgminAdd, ArgminDot, ArgminL2Norm, ArgminMul, ArgminWeightedDot, ArgminZeroLike,
@@ -181,7 +181,6 @@ where
 impl<P, O, F, H> Solver<O, IterState<P, P, (), H, (), F>> for Steihaug<P, F>
 where
     P: Clone
-        + SerializeAlias
         + ArgminMul<F, P>
         + ArgminL2Norm<F>
         + ArgminDot<P, F>

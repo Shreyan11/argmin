@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -6,9 +6,8 @@
 // copied, modified, or distributed except according to those terms.
 
 use crate::core::{
-    ArgminFloat, CostFunction, DeserializeOwnedAlias, Error, Executor, Gradient, IterState,
-    LineSearch, OptimizationResult, Problem, SerializeAlias, Solver, TerminationReason,
-    TerminationStatus, KV,
+    ArgminFloat, CostFunction, Error, Executor, Gradient, IterState, LineSearch,
+    OptimizationResult, Problem, Solver, TerminationReason, TerminationStatus, KV,
 };
 use argmin_math::{ArgminAdd, ArgminDot, ArgminL2Norm, ArgminMul, ArgminSub};
 #[cfg(feature = "serde1")]
@@ -99,26 +98,9 @@ where
 impl<O, L, P, G, H, F> Solver<O, IterState<P, G, (), H, (), F>> for DFP<L, F>
 where
     O: CostFunction<Param = P, Output = F> + Gradient<Param = P, Gradient = G>,
-    P: Clone
-        + SerializeAlias
-        + DeserializeOwnedAlias
-        + ArgminSub<P, P>
-        + ArgminDot<G, F>
-        + ArgminDot<P, H>
-        + ArgminMul<F, P>,
-    G: Clone
-        + SerializeAlias
-        + DeserializeOwnedAlias
-        + ArgminSub<G, G>
-        + ArgminL2Norm<F>
-        + ArgminDot<P, F>,
-    H: Clone
-        + SerializeAlias
-        + DeserializeOwnedAlias
-        + ArgminSub<H, H>
-        + ArgminDot<G, P>
-        + ArgminAdd<H, H>
-        + ArgminMul<F, H>,
+    P: Clone + ArgminSub<P, P> + ArgminDot<G, F> + ArgminDot<P, H> + ArgminMul<F, P>,
+    G: Clone + ArgminSub<G, G> + ArgminL2Norm<F> + ArgminDot<P, F>,
+    H: Clone + ArgminSub<H, H> + ArgminDot<G, P> + ArgminAdd<H, H> + ArgminMul<F, H>,
     L: Clone + LineSearch<P, F> + Solver<O, IterState<P, G, (), (), (), F>>,
     F: ArgminFloat,
 {

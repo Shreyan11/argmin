@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -24,7 +24,7 @@ struct Rosenbrock {
     lower_bound: Vec<f64>,
     /// upper bound
     upper_bound: Vec<f64>,
-    /// Random number generator. We use a `Arc<Mutex<_>>` here because `ArgminOperator` requires
+    /// Random number generator. We use a `Arc<Mutex<_>>` here because `Anneal` requires
     /// `self` to be passed as an immutable reference. This gives us thread safe interior
     /// mutability.
     rng: Arc<Mutex<Xoshiro256PlusPlus>>,
@@ -133,9 +133,6 @@ fn run() -> Result<(), Error> {
         // Optional: Attach a observer
         .add_observer(SlogLogger::term(), ObserverMode::Always)
         .run()?;
-
-    // Wait a second (lets the logger flush everything before printing again)
-    std::thread::sleep(std::time::Duration::from_secs(1));
 
     // Print result
     println!("{res}");

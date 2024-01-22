@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -21,8 +21,7 @@
 //! \[1\] <https://en.wikipedia.org/wiki/Particle_swarm_optimization>
 
 use crate::core::{
-    ArgminFloat, CostFunction, Error, PopulationState, Problem, SerializeAlias, Solver, SyncAlias,
-    KV,
+    ArgminFloat, CostFunction, Error, PopulationState, Problem, Solver, SyncAlias, KV,
 };
 use argmin_math::{ArgminAdd, ArgminMinMax, ArgminMul, ArgminRandom, ArgminSub, ArgminZeroLike};
 use rand::{Rng, SeedableRng};
@@ -279,8 +278,7 @@ where
 impl<O, P, F, R> Solver<O, PopulationState<Particle<P, F>, F>> for ParticleSwarm<P, F, R>
 where
     O: CostFunction<Param = P, Output = F> + SyncAlias,
-    P: SerializeAlias
-        + Clone
+    P: Clone
         + SyncAlias
         + ArgminAdd<P, P>
         + ArgminSub<P, P>

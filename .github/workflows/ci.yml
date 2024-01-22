@@ -52,6 +52,15 @@ jobs:
       - name: Test 
         run: cargo test -p argmin-observer-paramwriter
 
+  tests-argmin-checkpointing-file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test 
+        run: cargo test -p argmin-checkpointing-file
+
   tests-argmin-observer-spectator:
     runs-on: ubuntu-latest
     steps:
@@ -116,18 +125,20 @@ jobs:
           components: clippy
       - name: Clippy (argmin-math)
         run: cargo clippy -p argmin-math --all-targets --features "primitives,vec,nalgebra_latest,ndarray_latest" -- -D warnings
-      - name: Clippy (argmin) without default features
-        run: cargo clippy -p argmin --all-targets --no-default-features -- -D warnings
-      - name: Clippy (argmin) with default features
-        run: cargo clippy -p argmin --all-targets -- -D warnings
       - name: Clippy (argmin) with all features
-        run: cargo clippy -p argmin --all-targets --all-features -- -D warnings
+        run: cargo clippy -p argmin --all-targets --features "_full_dev" -- -D warnings
       - name: Clippy (argmin-observer-slog)
         run: cargo clippy -p argmin-observer-slog --all-targets --features "serde1" -- -D warnings
+      - name: Clippy (argmin-observer-paramwriter)
+        run: cargo clippy -p argmin-observer-paramwriter --all-targets -- -D warnings
       - name: Clippy (argmin-observer-spectator)
         run: cargo clippy -p argmin-observer-spectator --all-targets -- -D warnings
+      - name: Clippy (argmin-checkpointing-file)
+        run: cargo clippy -p argmin-checkpointing-file --all-targets -- -D warnings
       - name: Clippy (spectator)
         run: cargo clippy -p spectator --all-targets -- -D warnings
+      - name: Clippy (examples)
+        run: cargo clippy -p 'example-*' --all-targets --all-features -- -D warnings
 
   rustfmt:
     runs-on: ubuntu-latest

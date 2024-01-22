@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -76,9 +76,6 @@ fn run() -> Result<(), Error> {
             .add_observer(SlogLogger::term(), ObserverMode::Always)
             .run()?;
 
-        // Wait a second (lets the logger flush everything before printing again)
-        std::thread::sleep(std::time::Duration::from_secs(1));
-
         // Print result
         println!(
             "Polynomial root: {}",
@@ -93,7 +90,7 @@ fn run() -> Result<(), Error> {
             .configure(|state| state.max_iters(100))
             .add_observer(SlogLogger::term(), ObserverMode::Always)
             .run()?;
-        std::thread::sleep(std::time::Duration::from_secs(1));
+
         println!("{res}");
         println!(
             "Polynomial root: {}",
@@ -109,7 +106,7 @@ fn run() -> Result<(), Error> {
             .configure(|state| state.max_iters(100))
             .add_observer(SlogLogger::term(), ObserverMode::Always)
             .run()?;
-        std::thread::sleep(std::time::Duration::from_secs(1));
+
         println!("{res}");
         println!(
             "Polynomial root: {}",

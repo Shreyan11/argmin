@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -31,6 +31,7 @@ impl TerminationStatus {
     /// assert!(TerminationStatus::Terminated(TerminationReason::TargetCostReached).terminated());
     /// assert!(TerminationStatus::Terminated(TerminationReason::SolverConverged).terminated());
     /// assert!(TerminationStatus::Terminated(TerminationReason::KeyboardInterrupt).terminated());
+    /// assert!(TerminationStatus::Terminated(TerminationReason::Timeout).terminated());
     /// assert!(TerminationStatus::Terminated(TerminationReason::SolverExit("Exit reason".to_string())).terminated());
     /// ```
     pub fn terminated(&self) -> bool {
@@ -59,6 +60,8 @@ pub enum TerminationReason {
     KeyboardInterrupt,
     /// Converged
     SolverConverged,
+    /// Timeout reached
+    Timeout,
     /// Solver exit with given reason
     SolverExit(String),
 }
@@ -88,6 +91,10 @@ impl TerminationReason {
     ///     "Solver converged"
     /// );
     /// assert_eq!(
+    ///     TerminationReason::Timeout.text(),
+    ///     "Timeout reached"
+    /// );
+    /// assert_eq!(
     ///     TerminationReason::SolverExit("Aborted".to_string()).text(),
     ///     "Aborted"
     /// );
@@ -98,6 +105,7 @@ impl TerminationReason {
             TerminationReason::TargetCostReached => "Target cost value reached",
             TerminationReason::KeyboardInterrupt => "Keyboard interrupt",
             TerminationReason::SolverConverged => "Solver converged",
+            TerminationReason::Timeout => "Timeout reached",
             TerminationReason::SolverExit(reason) => reason.as_ref(),
         }
     }

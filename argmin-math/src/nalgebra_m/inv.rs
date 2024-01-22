@@ -1,4 +1,4 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -40,6 +40,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_relative_eq;
     use nalgebra::Matrix2;
     use paste::item;
 
@@ -59,7 +60,7 @@ mod tests {
                     let res = <Matrix2<$t> as ArgminInv<Matrix2<$t>>>::inv(&a).unwrap();
                     for i in 0..2 {
                         for j in 0..2 {
-                            assert!((((res[(i, j)] - target[(i, j)]) as f64).abs()) < std::f64::EPSILON);
+                            assert_relative_eq!(res[(i, j)], target[(i, j)], epsilon = std::$t::EPSILON);
                         }
                     }
                 }

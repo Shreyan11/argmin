@@ -1,13 +1,11 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use crate::core::{
-    ArgminFloat, Error, IterState, Operator, Problem, SerializeAlias, Solver, State, KV,
-};
+use crate::core::{ArgminFloat, Error, IterState, Operator, Problem, Solver, State, KV};
 use argmin_math::{ArgminConj, ArgminDot, ArgminL2Norm, ArgminMul, ArgminScaledAdd, ArgminSub};
 #[cfg(feature = "serde1")]
 use serde::{Deserialize, Serialize};
@@ -93,7 +91,6 @@ impl<P, O, F> Solver<O, IterState<P, (), (), (), (), F>> for ConjugateGradient<P
 where
     O: Operator<Param = P, Output = P>,
     P: Clone
-        + SerializeAlias
         + ArgminDot<P, F>
         + ArgminSub<P, P>
         + ArgminScaledAdd<P, F, P>

@@ -1,18 +1,18 @@
-// Copyright 2018-2022 argmin developers
+// Copyright 2018-2024 argmin developers
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-
 #[cfg(test)]
 mod tests {
     #[allow(unused_imports)]
     use super::*;
+    use approx::assert_relative_eq;
     use argmin_math::ArgminEye;
+    use ndarray::array;
     use ndarray::Array2;
-       use ndarray::array;
     use paste::item;
 
     macro_rules! make_test {
@@ -28,7 +28,7 @@ mod tests {
                     ];
                     for i in 0..3 {
                         for j in 0..3 {
-                            assert!((((res[(i, j)] - e[(i, j)]) as f64).abs()) < std::f64::EPSILON);
+                            assert_relative_eq!(res[(i, j)] as f64, e[(i, j)] as f64, epsilon = std::f64::EPSILON);
                         }
                     }
                 }
@@ -50,7 +50,7 @@ mod tests {
                     ];
                     for i in 0..3 {
                         for j in 0..3 {
-                            assert!((((res[(i, j)] - e[(i, j)]) as f64).abs()) < std::f64::EPSILON);
+                            assert_relative_eq!(res[(i, j)] as f64, e[(i, j)] as f64, epsilon = std::f64::EPSILON);
                         }
                     }
                 }
@@ -71,8 +71,6 @@ mod tests {
         };
     }
 
-    make_test!(isize);
-    make_test!(usize);
     make_test!(i8);
     make_test!(u8);
     make_test!(i16);
@@ -83,5 +81,4 @@ mod tests {
     make_test!(u64);
     make_test!(f32);
     make_test!(f64);
-
 }
