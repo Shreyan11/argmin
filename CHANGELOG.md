@@ -5,15 +5,94 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) (since argmin version 0.6.0),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (since argmin version 0.5.0).
 
-## argmin [argmin unreleased]
+## [argmin unreleased]
+* Added a new GUI observer called Spectator (`argmin-observer-spectator` and `spectator` packages) (@stefan-k, #311)
 
-## argmin-math [argmin-math unreleased]
+## [argmin-math unreleased]
 
-## argmin [argmin v0.9.0] 2024-01-06
+## [argmin v0.10.0] 2024-02-27
+
+### Added
+* Added optional timeout to Executor (@stefan-k, #405)
+
+### Changed
+* Users can now set ParticleSwarms random number generator (@jonboh, #383)
+* Moved all observers and checkpointing into dedicated crates. This led to substantially fewer dependencies for argmin itself
+  - `SlogLogger` moved into `argmin-observer-slog` (@stefan-k, #311)
+  - `WriteToFile` was renamed to `ParamWriter` and moved into `argmin-observer-paramwriter` (@stefan-k, #395)
+  - `FileCheckpoint` moved into `argmin-checkpointing-file` (@stefan-k, #311)
+* Added `state` to `observe_init` of `Observe` trait (@stefan-k, #311)
+* All crates are now in the `crates` directory (@stefan-k, #415)
+* All examples are now crates and are in the `examples` directory. (@stefan-k, #387)
+* Removed `SerializeAlias` and `DeserializeAlias` traits since they are not necessary anymore (@stefan-k, #395)
+* Residuals in CG are now handled by `IterState` (@stefan-k, #408)
+* Interrupt handling now includes `SIGINT`, `SIGTERM` and `SIGHUP` and `KeyboardInterrupt` was renamed to `Interrupt` (@stefan-k, #413)
+* Error handling in `LBFGS` was slightly improved (@stefan-k, #416)
+* `KvValue::get_float(&self)` now works for all kinds of `KvValue` (@stefan-k, #311)
+* Updated gnuplot from 0.0.39 to 0.0.4 (#394)
+
+### Fixed
+* Fixed residuals handling in `GaussNewton` (@gmilleramilar, @stefan-k, #343, #392)
+
+## [argmin-math v0.4.0] 2024-02-27
 
 ### Added
 
 * Implemented ArgminInv for f32/f64 (1D) (@sdrap, #346)
+* Test cases for ArgminMinMax were added (@Shreyan11, #391)
+
+### Changed
+
+* Default linalg backend for development is now MKL, which makes development on Windows possible. This required all ndarray tests to be moved in dedicated crates (@Tastaturtaste, #369)
+* `ArgminRandom::rand_from_range(..)` now also takes a random number generator. This allows for setting the seed manually (@jonboh, #383)
+
+### Removed
+
+* All `*-serde` features were removed, as they are not necessary anymore. (@stefan-k, #387)
+
+## [argmin-observer-slog v0.1.0] 2024-02-27
+
+Initial release.
+
+## [argmin-observer-paramwriter v0.1.0] 2024-02-27
+
+Initial release.
+
+## [argmin-checkpointing-file v0.1.0] 2024-02-27
+
+Initial release.
+
+## [argmin-testfunctions-py v0.0.1] 2024-02-16
+
+* The first version of a Python wrapper around `argmin_testfunctions` was released. 
+* The fact that this is still experimental is expressed with the version number 0.0.1. Eventually this module's version may end up in lockstep with `argmin_testfunctions`' version number.
+
+## [argmin_testfunctions v0.2.0] 2024-02-16
+
+All work of this release was done by @stefan-k.
+
+### Added
+
+* Added derivative and Hessian calculation to all test functions.
+* Tested all derivatives and Hessian against finite differences (with `finitediff`) on multiple positions with `proptest`.
+* Added const generics versions for the derivatives and Hessians of multi dimensional test functions to avoid allocations.
+* Those test functions which operate on a fixed number of parameters now take a fixed length array as input instead of a slice.
+
+### Fixed
+
+* Bugs in the Levy test function were fixed.
+
+### Changed
+
+* Rust edition 2021
+* Repository was moved into argmin monorepo
+* `rosenbrock` now only takes the parameters as input. For setting the additional optional parameters `a` and `b` one can use `rosenbrock_ab`
+* All `rosenbrock_2d*` functions were removed.
+
+## [argmin v0.9.0] 2024-01-06
+
+### Added
+
 * Added a simple example of Nelder-Mead usage (@cjordan, #359)
 
 ### Fixed
@@ -31,7 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Updated gnuplot to 0.0.39 (@stefan-k, #364)
 * Switched to resolver = 2 for entire workspace (@stefan-k, #372)
 
-## argmin [argmin v0.8.1] 2023-02-20
+## [argmin v0.8.1] 2023-02-20
 
 ### Added
 
@@ -49,7 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Updated slog-term to 2.9 (@stefan-k)
 * Updated slog-json to 2.6 (@stefan-k)
 
-## argmin [argmin v0.8.0] 2023-01-28
+## [argmin v0.8.0] 2023-01-28
 
 ### Added
 
@@ -71,7 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The check whether the target cost is reached is now based on the current best cost function value rather than the current cost function value (@relf)
 
 
-## argmin-math [argmin-math v0.3.0] 2023-01-28
+## [argmin-math v0.3.0] 2023-01-28
 
 ### Added
 
@@ -263,14 +342,22 @@ This is a rather large release with many (breaking) changes.
 
 For older versions please see the Git history.
 
-[argmin unreleased]: https://github.com/argmin-rs/argmin/compare/argmin-v0.8.1...HEAD
+[argmin unreleased]: https://github.com/argmin-rs/argmin/compare/argmin-v0.9.0...HEAD
 [argmin-math unreleased]: https://github.com/argmin-rs/argmin/compare/argmin-math-v0.3.0...HEAD
+[argmin_testfunctions unreleased]: https://github.com/argmin-rs/argmin/compare/argmin-v0.9.0...HEAD
+[argmin v0.10.0]: https://github.com/argmin-rs/argmin/compare/argmin-v0.9.0...argmin-v0.10.0
 [argmin v0.9.0]: https://github.com/argmin-rs/argmin/compare/argmin-v0.8.1...argmin-v0.9.0
 [argmin v0.8.1]: https://github.com/argmin-rs/argmin/compare/argmin-v0.8.0...argmin-v0.8.1
 [argmin v0.8.0]: https://github.com/argmin-rs/argmin/compare/argmin-v0.7.0...argmin-v0.8.0
 [argmin v0.7.0]: https://github.com/argmin-rs/argmin/compare/argmin-v0.6.0...argmin-v0.7.0
 [argmin v0.6.0]: https://github.com/argmin-rs/argmin/compare/v0.5.1...argmin-v0.6.0
+[argmin-math v0.4.0]: https://github.com/argmin-rs/argmin/compare/argmin-math-v0.3.0...argmin-math-v0.4.0
 [argmin-math v0.3.0]: https://github.com/argmin-rs/argmin/compare/argmin-math-v0.2.1...argmin-math-v0.3.0
 [argmin-math v0.2.1]: https://github.com/argmin-rs/argmin/compare/argmin-math-v0.2.0...argmin-math-v0.2.1
 [argmin-math v0.2.0]: https://github.com/argmin-rs/argmin/compare/argmin-math-v0.1.0...argmin-math-v0.2.0
 [argmin-math v0.1.0]: https://github.com/argmin-rs/argmin/compare/v0.5.1...argmin-math-v0.1.0
+[argmin-testfunctions-py v0.0.1]: https://github.com/argmin-rs/argmin/compare/argmin-v0.9.0...argmin-testfunctions-py-v0.0.1
+[argmin_testfunctions v0.2.0]: https://github.com/argmin-rs/argmin/compare/argmin-v0.9.0...argmin_testfunctions-v0.2.0
+[argmin-observer-slog v0.1.0]: https://github.com/argmin-rs/argmin/compare/v0.9.0...argmin-observer-slog-v0.1.0
+[argmin-observer-paramwriter v0.1.0]: https://github.com/argmin-rs/argmin/compare/v0.9.0...argmin-observer-paramwriter-v0.1.0
+[argmin-checkpointing-file v0.1.0]: https://github.com/argmin-rs/argmin/compare/v0.9.0...argmin-checkpointing-file-v0.1.0

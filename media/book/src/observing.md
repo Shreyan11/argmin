@@ -31,12 +31,9 @@ use argmin::core::observers::ObserverMode;
 use argmin_observer_slog::SlogLogger;
 # use argmin::solver::gradientdescent::SteepestDescent;
 # use argmin::solver::linesearch::MoreThuenteLineSearch;
-# use argmin_testfunctions::{rosenbrock_2d, rosenbrock_2d_derivative};
+# use argmin_testfunctions::{rosenbrock, rosenbrock_derivative};
 #
-# struct Rosenbrock {
-#     a: f64,
-#     b: f64,
-# }
+# struct Rosenbrock {}
 #
 # /// Implement `CostFunction` for `Rosenbrock`
 # impl CostFunction for Rosenbrock {
@@ -47,7 +44,7 @@ use argmin_observer_slog::SlogLogger;
 #
 #     /// Apply the cost function to a parameter `p`
 #     fn cost(&self, p: &Self::Param) -> Result<Self::Output, Error> {
-#         Ok(rosenbrock_2d(p, 1.0, 100.0))
+#         Ok(rosenbrock(p))
 #     }
 # }
 #
@@ -60,14 +57,14 @@ use argmin_observer_slog::SlogLogger;
 #
 #     /// Compute the gradient at parameter `p`.
 #     fn gradient(&self, p: &Self::Param) -> Result<Self::Gradient, Error> {
-#         Ok(rosenbrock_2d_derivative(p, 1.0, 100.0))
+#         Ok(rosenbrock_derivative(p))
 #     }
 # }
 #
 # fn run() -> Result<(), Error> {
 # 
 # // Define cost function (must implement `CostFunction` and `Gradient`)
-# let cost = Rosenbrock { a: 1.0, b: 100.0 };
+# let cost = Rosenbrock {};
 #  
 # // Define initial parameter vector
 # let init_param: Vec<f64> = vec![-1.2, 1.0];
@@ -98,6 +95,7 @@ let res = Executor::new(cost, solver)
 # }
 ```
 
+<!--
 ## Using Spectator
 
 [Spectator](https://crates.io/crates/spectator)  is a graphical visualization tool for showing the progress of optimization runs.
@@ -133,12 +131,9 @@ use argmin::core::observers::ObserverMode;
 use argmin_observer_spectator::SpectatorBuilder;
 # use argmin::solver::gradientdescent::SteepestDescent;
 # use argmin::solver::linesearch::MoreThuenteLineSearch;
-# use argmin_testfunctions::{rosenbrock_2d, rosenbrock_2d_derivative};
+# use argmin_testfunctions::{rosenbrock, rosenbrock_derivative};
 #
-# struct Rosenbrock {
-#     a: f64,
-#     b: f64,
-# }
+# struct Rosenbrock {}
 #
 # /// Implement `CostFunction` for `Rosenbrock`
 # impl CostFunction for Rosenbrock {
@@ -149,7 +144,7 @@ use argmin_observer_spectator::SpectatorBuilder;
 #
 #     /// Apply the cost function to a parameter `p`
 #     fn cost(&self, p: &Self::Param) -> Result<Self::Output, Error> {
-#         Ok(rosenbrock_2d(p, 1.0, 100.0))
+#         Ok(rosenbrock(p))
 #     }
 # }
 #
@@ -162,14 +157,14 @@ use argmin_observer_spectator::SpectatorBuilder;
 #
 #     /// Compute the gradient at parameter `p`.
 #     fn gradient(&self, p: &Self::Param) -> Result<Self::Gradient, Error> {
-#         Ok(rosenbrock_2d_derivative(p, 1.0, 100.0))
+#         Ok(rosenbrock_derivative(p))
 #     }
 # }
 #
 # fn run() -> Result<(), Error> {
 # 
 # // Define cost function (must implement `CostFunction` and `Gradient`)
-# let cost = Rosenbrock { a: 1.0, b: 100.0 };
+# let cost = Rosenbrock {};
 #  
 # // Define initial parameter vector
 # let init_param: Vec<f64> = vec![-1.2, 1.0];
@@ -215,3 +210,4 @@ let res = Executor::new(cost, solver)
 #     }
 # }
 ```
+-->

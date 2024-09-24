@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - win-netlib-fix
 
 env:
   CARGO_TERM_COLOR: always
@@ -15,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@stable
       - name: Test (default features)
         run: cargo test -p argmin
@@ -72,6 +72,24 @@ jobs:
       - name: Test (spectator)
         run: cargo test -p spectator
 
+  tests-argmin-testfunctions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test (testfunctions)
+        run: cargo test -p argmin_testfunctions
+
+  tests-finitediff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test (testfunctions)
+        run: cargo test -p finitediff --all-features
+
   tests-argmin-math:
     runs-on: ubuntu-latest
     steps:
@@ -96,13 +114,9 @@ jobs:
         run: cargo test -p argmin-math --no-default-features --features "ndarray_v0_13-nolinalg"
       # ndarray with linalg
       - name: argmin-math (ndarray_latest)
-        run: cargo test --manifest-path ./argmin-math/ndarray-linalg-tests/ndarray_latest/Cargo.toml
+        run: cargo test --manifest-path ./crates/argmin-math/ndarray-linalg-tests/ndarray_latest/Cargo.toml
       - name: argmin-math (ndarray_v0_15)
-        run: cargo test --manifest-path ./argmin-math/ndarray-linalg-tests/ndarray_0_15/Cargo.toml
-      - name: argmin-math (ndarray_v0_14)
-        run: cargo test --manifest-path ./argmin-math/ndarray-linalg-tests/ndarray_0_14/Cargo.toml
-      - name: argmin-math (ndarray_v0_13)
-        run: cargo test --manifest-path ./argmin-math/ndarray-linalg-tests/ndarray_0_13/Cargo.toml
+        run: cargo test --manifest-path ./crates/argmin-math/ndarray-linalg-tests/ndarray_0_15/Cargo.toml
       # nalgebra
       - name: argmin-math (nalgebra_latest)
         run: cargo test -p argmin-math --no-default-features --features "nalgebra_latest"
@@ -172,11 +186,11 @@ jobs:
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh 
       - name: Build target wasm32-unknown-unknown
-        run: cargo build --workspace --exclude argmin-observer-spectator --exclude spectator --exclude argmin-observer-paramwriter --exclude "example-*" --target wasm32-unknown-unknown --features wasm-bindgen
+        run: cargo build --workspace --exclude argmin-observer-spectator --exclude spectator --exclude argmin-observer-paramwriter --exclude "example-*" --exclude argmin-testfunctions-py --target wasm32-unknown-unknown --features wasm-bindgen
       - name: Build target wasm32-wasi with feature wasm-bindgen
-        run: cargo build --workspace --exclude argmin-observer-spectator --exclude spectator --exclude argmin-observer-paramwriter --exclude "example-*" --target wasm32-wasi --features wasm-bindgen
+        run: cargo build --workspace --exclude argmin-observer-spectator --exclude spectator --exclude argmin-observer-paramwriter --exclude "example-*" --exclude argmin-testfunctions-py --target wasm32-wasi --features wasm-bindgen
       - name: Build target wasm32-unknown-emscripten
-        run: cargo build --workspace --exclude argmin-observer-spectator --exclude spectator --exclude argmin-observer-paramwriter --exclude "example-*" --target wasm32-unknown-emscripten --no-default-features --features wasm-bindgen
+        run: cargo build --workspace --exclude argmin-observer-spectator --exclude spectator --exclude argmin-observer-paramwriter --exclude "example-*" --exclude argmin-testfunctions-py --target wasm32-unknown-emscripten --no-default-features --features wasm-bindgen
 
   cargo-deny:
     runs-on: ubuntu-latest
